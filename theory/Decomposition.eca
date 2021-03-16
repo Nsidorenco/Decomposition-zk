@@ -1,0 +1,143 @@
+(* Formalization of MPC Phi decomposition *)
+require import AllCore Distr List IntDiv DList DInterval.
+(** Ignore: This is now the preferred setup but is not yet the default **)
+pragma -oldip. pragma +implicits.
+
+type input.
+type output.
+type share.
+type gate.
+type random.
+type projected_view.
+type verification_input = projected_view list.
+type challenge = int.
+
+type circuit = gate list.
+type view = share list * random.
+
+op challenge : challenge distr.
+op output (v : view) : share.
+op reconstruct (ss : share list) : output.
+op circuit_eval (c : circuit) (x : input) : output.
+op valid_circuit (c : circuit) : bool.
+op f (vs : view list, e : int) : verification_input.
+op f_inv (vs : verification_input) : view list.
+
+const n : int.
+const d : int.
+
+axiom n_pos : 0 < n.
+axiom d_pos : 0 < d.
+axiom d_leq_n : d <= n.
+
+op nth_looping (vs : 'a list) (i : int) =
+  nth witness vs (i %% n).
+
+op in_dom_f (n : int) (e : challenge) (i : int) : bool.
+
+op in_doms_f n (es : challenge list) i =
+  foldr (fun e acc => acc /\ in_dom_f n e i) true es.
+
+op proj_mapping (i e : int) : int.
+
+op fully_consistent (vs' : verification_input list) (es : challenge list) =
+  forall l k j, 0 <= l < size es /\ 0 <= k < size es /\ in_doms_f n [nth witness es l; nth witness es k] j =>
+       nth witness (nth witness vs' l) (proj_mapping j (nth witness es l)) =
+       nth witness (nth witness vs' k) (proj_mapping j (nth witness es k)).
+
+axiom f_inv_correct vs e:
+  e \in challenge =>
+  forall i, in_dom_f n e i =>
+      nth witness vs i = nth witness (f_inv (f vs e)) (proj_mapping i e).
+
+axiom f_inv_hom v v' i i':
+    nth witness (f_inv v) i <> nth witness (f_inv v') i' => 
+    nth witness v i <> nth witness v' i'.
+
+(* random seed distribution *)
+op drandom : {random distr | is_lossless drandom /\ is_uniform drandom} as drandom_lluni.
+
+module type Phi = {
+  proc* sample_tapes(n : int) : random list
+  proc decomp(c : circuit, x : input, rs : random list) : view list
+  proc verify(c : circuit, vs : verification_input, e : int, ys : share list) : bool {}
+  proc simulator(c : circuit, y : output, e : int) : verification_input * share list
+  proc extractor(vs : verification_input list) : input option
+}.
+
+module Privacy(D : Phi) = {
+  proc real(c, x, e) = {
+    var rs, vs, ys;
+    rs <- D.sample_tapes(size c);
+    vs <- D.decomp(c, x, rs);
+    ys <- map output vs;
+    return ((f vs e), ys);
+  }
+
+  proc ideal(c, y, e) = {
+    var vs, ys;
+    (vs, ys) <- D.simulator(c, y, e);
+    return (vs, ys);
+  }
+}.
+
+module Verifiability(D : Phi) = {
+  proc main(c, w, e) = {
+    var vs, valid, vs', ys, y, rs, y', ws;
+    rs <- D.sample_tapes(size c);
+    vs <- D.decomp(c, w, rs);
+    ys <- [];
+    ys <- (map output vs);
+    y <- reconstruct(ys);
+    y' <- circuit_eval c w;
+    vs' <- f vs e;
+    ws <- f_inv vs';
+    valid <- D.verify(c, vs', e, ys);
+
+    return valid /\ y = y';
+  }
+}.
+
+module Soundness(D : Phi) = {
+  proc main(c, vs', es : challenge list, ys) = {
+    var xopt, v,  verified, tmp, i, e, ret;
+    verified <- true;
+    i <- 0;
+    while (i < size vs') {
+      v <- (nth witness vs' i);
+      e <- (nth witness es i);
+      tmp <- D.verify(c, v, e, ys);
+      verified <- verified /\ tmp;
+      i <- i + 1;
+    }
+
+    if (fully_consistent vs' es) {
+      xopt <- D.extractor(vs');
+      ret <- xopt <> None /\ circuit_eval c (oget xopt) = reconstruct ys;
+    } else{
+      ret <- false;
+    }
+
+    return ret;
+  }
+}.
+
+(* Lemmas: *)
+(*---------*)
+(* lemma correctness c x rs &m: *)
+(*   Pr[Correctness(D).main(c, x, rs) @ &m : res] = 1%r. *)
+(*---------*)
+(* lemma privacy c' x' y' e': *)
+(*     0 < e' /\ e' <= 3 => *)
+(*     y' = eval_circuit c' [x'] => *)
+(*       equiv[Privacy.real ~ Privacy.ideal : (={c, e} /\ c{1} = c' /\ h{1} = x' /\ y{2} = y' /\ e{1} = e') *)
+(*             ==> ={res}]. *)
+(*---------*)
+(* lemma verifiability c x, y rs &m: *)
+(*     Pr[Verifiability(D).main(c, x, rs) @ &m : res] = 1%r. *)
+(*---------*)
+(* d+1-Special Soundness *)
+(* lemma soundness c vs' y &m: *)
+(*   (forall i, (0 <= i /\ i <= d + 1) => *)
+(*   Pr[D.verify(c, vs', y) @ &m : res] = 1%r) *)
+(*   => Pr[Soundness(D).main(c, vs', y) @ &m : res] = 1%r. *)
