@@ -85,16 +85,16 @@ clone import Decomposition as MPC' with
       progress.
       case (e = 0); progress.
       - rewrite /proj_mapping. simplify. 
-        case (i < 0). move: H0. simplify. smt.
+        case (i < 0). move: H0. simplify. rewrite supp_dinter=>/#.
         case (i < 2). move: H0. simplify. progress. smt().
-        move: H0. simplify. progress. smt.
+        move: H0. simplify. progress. rewrite supp_dinter in H0=>/#.
       case (e = 1); progress.
       - rewrite /proj_mapping. simplify. 
-        case (i < 1). move: H0. simplify. smt.
+        case (i < 1). move: H0. simplify. rewrite supp_dinter=>/#.
         case (i < 3). move: H0. simplify. progress. clear H H1. 
         case (i = 1). smt().
-        case (i = 2). smt(). progress. smt.
-        move: H0. simplify. progress. smt.
+        case (i = 2). smt(). progress. rewrite supp_dinter in H0=>/#.
+        move: H0. simplify. progress. rewrite supp_dinter in H0=>/#.
       case (e = 2); progress.
         case (i = 0). smt().
         case (i = 2). smt().
@@ -845,7 +845,7 @@ proof.
   move=> _ Hvalid;
   rewrite /valid_gate in Hvalid=>/>.
   - smt(nth_cat).
-  - smt(nth_cat).
+  - rewrite nth_cat. smt().
   - have Hx : x < size w2{hr} by smt().
     have Hy : y < size w2{hr} by smt().
     rewrite nth_cat.
@@ -1150,8 +1150,6 @@ proof.
   smt().
   smt().
   smt().
-  by rewrite /f /nth_looping /output.
-  by rewrite /f /nth_looping /output.
   rewrite /f /nth_looping /valid_view_op.
   simplify.
   rewrite foldr_range.
@@ -1209,9 +1207,6 @@ foldr
   rewrite H16 -H18 -H17.
   have <- := H10 (size result.`4 - 1) _. smt(size_ge0).
   smt().
-  
-  by rewrite /output /f /nth_looping.
-  by rewrite /output /f /nth_looping.
 
   rewrite /f /nth_looping /valid_view_op. simplify.
   rewrite foldr_range.
@@ -1441,8 +1436,23 @@ proof.
           case (b < size w10{1}).
           case (0 <= b).
           + move=> Hb0 Hb Ha0 Ha.
-            rewrite -!mulzDl.
-            rewrite !addzA.
+            (* rewrite -!mulzDl. *)
+            (* rewrite !addzA. *)
+            (* have ? := H a Ha. *)
+            (* have ? := H b Hb. *)
+            pose x1 := (nth 0 w10{1} a).
+            pose x2 := (nth 0 w20{1} a).
+            pose x3 := (nth 0 w30{1} a).
+            pose y1 := (nth 0 w10{1} b).
+            pose y2 := (nth 0 w20{1} b).
+            pose y3 := (nth 0 w30{1} b).
+            pose x1' := (nth 0 w10{2} a).
+            pose x2' := (nth 0 w20{2} a).
+            pose x3' := (nth 0 w30{2} a).
+            pose y1' := (nth 0 w10{2} b).
+            pose y2' := (nth 0 w20{2} b).
+            pose y3' := (nth 0 w30{2} b).
+            clear H0 H1 H2 H3 H4 H5 H6 H7 H8 H9 H10 H11 H12 H13 H14 H15 H16 H17 H18 H19 H20.
             smt().
           + smt(size_ge0 size_rcons nth_out).
           + smt(size_ge0 size_rcons nth_out).

@@ -1,9 +1,8 @@
 
 # Installation requirements
-- Why3 1.2.1
-- Z3 4.8.6
-- Alt-Ergo 2.3.0
-- Easycrypt Git hash 30079829a1911b1f5905d31f84946ad825764971
+- Why3 1.3.3
+- Z3 4.7.1
+- Easycrypt Git hash ddb426b596c97417989ff28cf3f382649caee4af
   - It is recommended to run ```easycrypt why3config``` to set up the smt solvers.
 
 # About the files

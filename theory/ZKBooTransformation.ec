@@ -1163,9 +1163,9 @@ proof.
     smt(size_ge0).
     smt(drop_le0 size_ge0).
     smt(drop_le0 size_ge0).
-    smt(size_ge0).
-    smt(size_ge0).
-    smt(size_ge0).
+    smt(size_ge0 size_eq0).
+    smt(size_ge0 size_eq0).
+    smt(size_ge0 size_eq0).
     rcondf{2} 12; progress.
     - while (true); auto.
       while (true); auto.
@@ -1340,6 +1340,10 @@ proof.
   - auto; progress.
     + smt().
   auto; progress.
+  smt().
+  smt().
+  smt().
+  smt().
   smt().
 qed.
 
