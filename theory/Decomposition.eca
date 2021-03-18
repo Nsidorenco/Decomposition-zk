@@ -121,23 +121,3 @@ module Soundness(D : Phi) = {
     return ret;
   }
 }.
-
-(* Lemmas: *)
-(*---------*)
-(* lemma correctness c x rs &m: *)
-(*   Pr[Correctness(D).main(c, x, rs) @ &m : res] = 1%r. *)
-(*---------*)
-(* lemma privacy c' x' y' e': *)
-(*     0 < e' /\ e' <= 3 => *)
-(*     y' = eval_circuit c' [x'] => *)
-(*       equiv[Privacy.real ~ Privacy.ideal : (={c, e} /\ c{1} = c' /\ h{1} = x' /\ y{2} = y' /\ e{1} = e') *)
-(*             ==> ={res}]. *)
-(*---------*)
-(* lemma verifiability c x, y rs &m: *)
-(*     Pr[Verifiability(D).main(c, x, rs) @ &m : res] = 1%r. *)
-(*---------*)
-(* d+1-Special Soundness *)
-(* lemma soundness c vs' y &m: *)
-(*   (forall i, (0 <= i /\ i <= d + 1) => *)
-(*   Pr[D.verify(c, vs', y) @ &m : res] = 1%r) *)
-(*   => Pr[Soundness(D).main(c, vs', y) @ &m : res] = 1%r. *)

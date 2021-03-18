@@ -29,4 +29,45 @@ proof.
    elim xs; progress.
 qed.
  
+op folding_op (N : int) (f : int -> bool) =
+  (foldr (fun i acc, acc /\ f i)
+    true (range 0 N)).
+
+pred forall_op (N : int) (f : int -> bool) =
+    forall i, 0 <= i < N => f i.
+
+(* Helper lemma*)
+lemma foldr_false (N : int) f :
+  foldr (fun (i : int) (acc : bool) => acc /\ f i) false (range 0 N) = false.
+proof.
+  elim /natind N.
+  - progress. rewrite range_geq. assumption. done.
+  - progress.
+    rewrite rangeSr. assumption.
+    rewrite -cats1.
+    rewrite foldr_cat.
+    simplify.
+    by rewrite H0.
+qed.
+    
+
+(* Helper Lemma *)
+lemma op_reflect N f : folding_op N f = forall_op N f.
+proof.
+  rewrite /folding_op /forall_op.
+  elim /natind N.
+  - progress. rewrite range_geq. assumption. smt().
+  - progress.
+    rewrite rangeSr. assumption.
+    rewrite -cats1.
+    rewrite foldr_cat.
+    simplify.
+    have -> : (forall (i : int), 0 <= i && i < n + 1 => f i) <=> (forall (i : int), 0 <= i && i < n => f i) /\ f n.
+    - progress.
+      smt().
+      smt().
+      smt().
+    case (f n); progress.
+    by rewrite foldr_false.
+qed.
 

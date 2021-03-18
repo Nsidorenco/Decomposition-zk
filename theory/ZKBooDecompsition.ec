@@ -140,48 +140,6 @@ with g = ADDC inputs =>
 with g = MULTC inputs => phi_decomp g idx p w1 w2 k1 k2
 with g = ADD inputs => phi_decomp g idx p w1 w2 k1 k2.
 
-op folding_op (N : int) (f : int -> bool) =
-  (foldr (fun i acc, acc /\ f i)
-    true (range 0 N)).
-
-pred forall_op (N : int) (f : int -> bool) =
-    forall i, 0 <= i < N => f i.
-
-(* Helper lemma*)
-lemma foldr_false (N : int) f :
-  foldr (fun (i : int) (acc : bool) => acc /\ f i) false (range 0 N) = false.
-proof.
-  elim /natind N.
-  - progress. rewrite range_geq. assumption. done.
-  - progress.
-    rewrite rangeSr. assumption.
-    rewrite -cats1.
-    rewrite foldr_cat.
-    simplify.
-    by rewrite H0.
-qed.
-    
-
-(* Helper Lemma *)
-lemma op_reflect N f : folding_op N f = forall_op N f.
-proof.
-  rewrite /folding_op /forall_op.
-  elim /natind N.
-  - progress. rewrite range_geq. assumption. smt().
-  - progress.
-    rewrite rangeSr. assumption.
-    rewrite -cats1.
-    rewrite foldr_cat.
-    simplify.
-    have -> : (forall (i : int), 0 <= i && i < n + 1 => f i) <=> (forall (i : int), 0 <= i && i < n => f i) /\ f n.
-    - progress.
-      smt().
-      smt().
-      smt().
-    case (f n); progress.
-    by rewrite foldr_false.
-qed.
-
 op valid_view_op (p : int) (view view2 : view) (c : circuit) =
   (foldr (fun i acc,
             acc /\ (nth 0 view.`1 (i + 1)) = phi_decomp (nth (ADDC(0,0)) c i) i p view.`1 view2.`1 view.`2 view2.`2)
@@ -234,12 +192,6 @@ proof.
       progress.
       have := eval_circuit_module_fail c' s' y &m.
       progress. smt().
-qed.
-
-lemma eval_circuit c' s' &m:
-    Pr[Circuit.eval(c', s') @ &m : res = eval_circuit c' s'] = 1%r.
-proof.
-    by rewrite - eval_circuit_module.
 qed.
 
 module Phi = {
@@ -424,12 +376,6 @@ module Phi = {
 
     return (k1, k2, k3, w1, w2);
   }
-  proc simulate_stepped(c : circuit, e : int, w1 w2 : int list, k1 k2 k3 : random) = {
-    (k1, k2, k3, w1, w2) <- simulate([head (ADDC(0,0)) c], e, w1, w2, k1, k2, k3);
-    c <- behead c;
-    (k1, k2, k3, w1, w2) <- simulate(c, e, w1, w2, k1, k2, k3);
-    return (k1, k2, k3, w1, w2);
-  }
 
   proc simulate_stepped_reversed(c : circuit, g : gate, e : int, w1 w2 : int list, k1 k2 k3 : random) = {
     (k1, k2, k3, w1, w2) <- simulate(c, e, w1, w2, k1, k2, k3);
@@ -545,17 +491,6 @@ proof.
   smt().
 qed.
 
-lemma gate_computation_order_tape g i (p : int) (w1 w2 : share list) k1 k2 k1' k2' :
-    0 <= i /\ (i < size k1) /\ size w1 = size w2 /\ size k1 = size k2 /\ size w1 <= size k1 + 1 /\ valid_gate g i =>
-    phi_decomp g i p w1 w2 k1 k2 = phi_decomp g i p w1 w2 (k1++k1') (k2++k2').
-proof.
-  elim g;
-  move=> x; case x=> x1 x2;
-  rewrite /valid_gate; progress;
-  rewrite !nth_cat;
-  smt().
-qed.
-
 lemma gate_computation_order_eq g i (p : int) (w1 w2 w1' w2' : share list) k1 k2:
     (i = size w1 - 1) /\ size w1 = size w2 /\ size k1 = size k2 /\ size k1 = size w1 /\ valid_gate g i =>
     phi_decomp g i p w1 w2 k1 k2 = phi_decomp g i p (w1++w1') (w2++w2') k1 k2.
@@ -590,62 +525,6 @@ proof.
   smt(nth_cat).
 qed.
 
-equiv compute_fixed_output_eq:
-     Phi.compute ~ Phi.compute_fixed :
-     ={c, w1, w2, w3} /\ size w1{2} = size w2{2} /\ size w1{2} = size w3{2}==>
-     let (k1, k2, k3, w1, w2, w3) = res{1} in
-     let (k1', k2', k3', w1', w2', w3') = res{2} in
-     last 0 w1 + last 0 w2 + last 0 w3 = last 0 w1' + last 0 w2' + last 0 w3'.
-proof.
-    proc.
-    inline Phi.gate_eval.
-    while (={c} /\ size w1{1} = size w1{2}
-                /\ size w2{1} = size w2{2}
-                /\ size w3{1} = size w3{2}
-                /\ size w1{1} = size w2{1}
-                /\ size w1{1} = size w3{1}
-                /\ size w1{2} = size w2{2}
-                /\ size w1{2} = size w3{2}
-                /\ forall i, nth 0 w1{1} i + nth 0 w2{1} i + nth 0 w3{1} i = nth 0 w1{2} i + nth 0 w2{2} i + nth 0 w3{2} i).
-    auto.
-    progress.
-    apply dinput_ll.
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    rewrite !nth_rcons - H - H0 - H1 - H2 - H3.
-    case (i < size w1{1}); progress.
-    smt.
-    case (i = size w1{1}); progress.
-    elim (head (ADDC(0,0)) c{2}); move=>x; case x=> x1 x2.
-    rewrite /phi_decomp.
-    smt(nth_rcons).
-    smt().
-    smt().
-    smt().
-    auto.
-    progress.
-    smt(nth_last).
-qed.
-
-lemma size_behead (l : 'a list):
-    size l <= 1 => behead l = [].
-proof.
-    elim l.
-    smt().
-    progress.
-    have : size l = 0. smt(size_ge0).
-    progress.
-    smt(size_ge0 size_cat).
-qed.
-
-lemma eval_gate_aux_size g s:
-    size (eval_circuit_aux [g] s) = size s + 1 by smt.
-
 lemma eval_circuit_aux_size c:
     (forall s,
       size (eval_circuit_aux c s) = size s + size c).
@@ -665,15 +544,6 @@ lemma eval_circuit_rcons c:
     (rcons (eval_circuit_aux c s) (eval_gate g (eval_circuit_aux c s))
     =
     eval_circuit_aux (rcons c g) s)).
-proof.
-  elim c; smt.
-qed.
-
-lemma eval_circuit_cat c c':
-  (forall s,
-    (eval_circuit_aux (c ++ c') s)
-    =
-    eval_circuit_aux c' (eval_circuit_aux c s)).
 proof.
   elim c; smt.
 qed.
@@ -1090,44 +960,6 @@ proof.
     have : result0 = (result0.`1, result0.`2, result0.`3, result0.`4, result0.`5, result0.`6) by smt().
     smt().
     have : result0 = (result0.`1, result0.`2, result0.`3, result0.`4, result0.`5, result0.`6) by smt().
-    smt().
-qed.
-
-
-lemma valid_view_fold (c : circuit) w1 w2 k1 k2 n p:
-  0 <= n <= size w1 /\
-  valid_circuit c /\ size w2 = size k1 + 1 /\ size w1 - 1 = size k1 /\ size k1 = size k2 /\
-  (forall (i : int),
-      0 <= i /\ i + 1 < n =>
-      nth 0 w1 (i + 1) =
-    phi_decomp (nth (ADDC (0, 0)) c i) i p w1 w2 k1 k2)
-    =>
-  (foldr
-    (fun (i : int) (acc : bool) =>
-      acc /\
-      nth 0 w1 (i + 1) =
-      phi_decomp (nth (ADDC (0, 0)) c i) i p w1 w2 k1 k2) true
-    (range 0 (n - 1))) = true.
-proof.
-  elim /natind n.
-  - smt(range_geq).
-  - progress.
-    have IH := H0 _. smt(size_rcons size_ge0). clear H0.
-    progress.
-    case (0 <= n - 1)=> Hn.
-    have -> := range_cat (n - 1) 0 n _ _. smt(). smt().
-    rewrite foldr_cat.
-    have -> :(foldr
-     (fun (i : int) (acc : bool) =>
-        acc /\
-        nth 0 w1 (i + 1) = phi_decomp (nth (ADDC (0, 0)) c i) i p w1 w2 k1 k2)
-     true (range (n-1) n)) = true.
-    rewrite rangeS.
-    simplify. have -> := H7 (n - 1). smt().
-    done.
-    smt().
-    have : n = 0. smt().
-    progress. rewrite range_geq. smt().
     smt().
 qed.
 
@@ -1898,77 +1730,6 @@ proof.
     smt().
 qed.
 
-(* lemma list_size_challenge (l : challenge list): *)
-(*     size l = 3 /\ undup l = l /\ *)
-(*     (forall i, 0 <= i < size l => nth witness l i \in challenge) => 0 \in l /\ 1 \in l /\ 2 \in l. *)
-(* proof. *)
-(*   progress. *)
-(*   have -> := (list_size_elems l H). *)
-(*   case (nth witness l 0 = 0). *)
-(*   - case (nth witness l 1 = 1). *)
-(*     + have : nth witness l 2 = 2 \/ nth witness l 2 = 0 \/ nth witness l 2 = 1.  *)
-(*       - have := H1 2 _. *)
-(*         rewrite H. split=>/>. *)
-(*       rewrite supp_dinter. *)
-(*       smt(). *)
-(*   - case (nth witness l 1 = 2). *)
-(*     + smt().  *)
-(*   case (nth witness l 0 = 1). *)
-(*   - smt(). *)
-(*   case (nth witness l 0 = 2). *)
-(*   - smt(). *)
-(*   smt(). *)
-(*   smt(). *)
-(*   have -> := (list_size_elems l H). *)
-(*   case (nth witness l 0 = 0). *)
-(*   - case (nth witness l 1 = 1). *)
-(*     + have : nth witness l 2 = 2 \/ nth witness l 2 = 0 \/ nth witness l 2 = 1.  *)
-(*       - have := H1 2 _. *)
-(*         rewrite H. split=>/>. *)
-(*       rewrite supp_dinter. *)
-(*       smt(). *)
-(*   - case (nth witness l 1 = 2). *)
-(*     + smt().  *)
-(*   case (nth witness l 0 = 1). *)
-(*   - smt(). *)
-(*   case (nth witness l 0 = 2). *)
-(*   - smt(). *)
-(*   smt(). *)
-(*   progress. *)
-(*   progress. *)
-(*   right. *)
-(*   have : uniq (undup l) by apply undup_uniq. *)
-(*   rewrite /uniq. *)
-(*   progress. *)
-(*   apply list_size_elems in H. *)
-(*   move: H0. rewrite H. *)
-(*   simplify.  *)
-(*   progress. *)
-(*   case : (nth witness l 0 <> nth witness l 1). *)
-(*   case : (nth witness l 0 <> nth witness l 2). *)
-(*   case : (nth witness l 1 <> nth witness l 2). *)
-(*   - progress. *)
-(*     admit. *)
-  
-(*   have Hsize : size l = 3. rewrite H. reflexivity. *)
-(*   have -> := (list_size_elems l Hsize). *)
-(*   case (nth witness l 0 = 0). *)
-(*   - case (nth witness l 1 = 1). *)
-(*     + have : nth witness l 2 = 2 \/ nth witness l 2 = 0 \/ nth witness l 2 = 1. smt. *)
-(*       progress. *)
-(*       have -> : nth witness l 2 = 2. smt. *)
-(*       smt. *)
-(*   - case (nth witness l 1 = 2). *)
-(*     + smt.  *)
-(*   case (nth witness l 0 = 1). *)
-(*   - smt. *)
-(*   case (nth witness l 0 = 2). *)
-(*   - smt. *)
-(*   smt. *)
-(*   smt. *)
-(* qed. *)
-
-
 lemma soundness c' vs'' es' ys' &m:
     (forall i, 0 <= i < n => phoare[Phi.verify : c = c' /\ vs = nth witness vs'' i /\ e = i /\ ys = ys' /\ e \in challenge ==> res] = 1%r) /\
     size vs'' = size es' /\ undup es' = es' /\ size es' = 3 /\ es' = [0;1;2] /\
@@ -2182,9 +1943,6 @@ lemma phi_sim_equiv g e':
               size (eval_circuit_aux [g] s) = size phi_w2 /\
               size (eval_circuit_aux [g] s) = size phi_w3 /\
               (forall i, 0 <= i < size phi_w1 => (nth 0 phi_w1 i) + (nth 0 phi_w2 i) + (nth 0 phi_w3 i) = (nth 0 (eval_circuit_aux [g] s) i)) /\
-              (* (exists (k1, k2, k3), phi_w1 = (rcons w1{1} (phi_decomp g 1 w1' w2' k1 k2)) /\ *)
-              (*                       phi_w2 = (rcons w2{1} (phi_decomp g 2 w2' Phi.w3 k2 k3)) /\ *)
-              (*                       phi_w3 = (rcons w3{1} (phi_decomp g 3 w3' w1' k3 k1))) /\ *)
             (if e' = 0 then
               (sim_k1, sim_k2, sim_w1, sim_w2) = (k1, k2, phi_w1, phi_w2)
             else
@@ -2195,8 +1953,6 @@ lemma phi_sim_equiv g e':
 proof.
     progress.
     proc.
-    (* have Hs1 : size w1' = size w2' by smt(). *)
-    (* have Hs2 : size w1' = size w3' by smt(). *)
     rcondt{1} 1. auto.
     rcondt{2} 2. auto.
     rcondf{2} 14. auto.
@@ -2521,8 +2277,8 @@ lemma phi_sim_circuit_equiv c' e':
               size k1 = size sim_k1 /\
               size k2 = size sim_k2 /\
               size k3 = size sim_k3 /\
-              size phi_w1{1} = (size s + size c') /\
-              (forall i, 0 <= i < size phi_w1{1} => (nth 0 phi_w1 i) + (nth 0 phi_w2 i) + (nth 0 phi_w3 i) = (nth 0 (eval_circuit_aux c' s) i)) /\
+              size phi_w1 = (size s + size c') /\
+              (forall i, 0 <= i < size phi_w1 => (nth 0 phi_w1 i) + (nth 0 phi_w2 i) + (nth 0 phi_w3 i) = (nth 0 (eval_circuit_aux c' s) i)) /\
             (if e' = 0 then
               (sim_k1, sim_k2, sim_w1, sim_w2) = (k1, k2, phi_w1, phi_w2)
             else
@@ -2578,7 +2334,7 @@ proof.
             size k1 = size sim_k1 /\
             size k2 = size sim_k2 /\
             size k3 = size sim_k3 /\
-            size phi_w1{1} = size s + size (rcons x l) /\
+            size phi_w1 = size s + size (rcons x l) /\
             (forall i, 0 <= i < size phi_w1 => (nth 0 phi_w1 i) + (nth 0 phi_w2 i) + (nth 0 phi_w3 i) = (nth 0 (eval_circuit_aux (rcons x l) s) i)) /\
           (if e' = 0 then
             (sim_k1, sim_k2, sim_w1, sim_w2) = (k1, k2, phi_w1, phi_w2)
@@ -2595,8 +2351,6 @@ proof.
       proc. inline *. sp.
       splitwhile{1} 1 : 1 < size c.
       sim : (={w1, w2, w3, k1, k2, k3}).
-      (* sim : (={w1, w2, w3, k1, k2, k3}). *)
-      (* Invariant that behead c{1} = [l] *)
       wp.
       while (c{1} = rcons c0{2} l /\ w10{2} = w1{1} /\ w20{2} = w2{1} /\ w30{2} = w3{1} /\ k1{1} = k10{2} /\ k2{1} = k20{2} /\ k3{1} = k30{2}).
       auto. progress.
@@ -2694,7 +2448,7 @@ proof.
         size k1 = size sim_k1 /\
         size k2 = size sim_k2 /\
         size k3 = size sim_k3 /\
-        size phi_w1{1} = size s + size (rcons x l) /\
+        size phi_w1 = size s + size (rcons x l) /\
         (forall i, 0 <= i < size phi_w1 => (nth 0 phi_w1 i) + (nth 0 phi_w2 i) + (nth 0 phi_w3 i) = (nth 0 (eval_circuit_aux (rcons x l) s) i)) /\
       (if e' = 0 then
         (sim_k1, sim_k2, sim_w1, sim_w2) = (k1, k2, phi_w1, phi_w2)
@@ -2711,8 +2465,6 @@ proof.
     proc. inline *. sp.
     splitwhile{1} 1 : 1 < size c.
     sim : (={w1, w2, k1, k2, k3}).
-    (* sim : (={w1, w2, w3, k1, k2, k3}). *)
-    (* Invariant that behead c{1} = [l] *)
     wp.
     while (c{1} = rcons c0{2} l /\ ={p1, p2} /\ e{1} = e0{2} /\ w10{2} = w1{1} /\ w20{2} = w2{1} /\ k1{1} = k10{2} /\ k2{1} = k20{2} /\ k3{1} = k30{2}).
     auto. progress.
@@ -2756,7 +2508,7 @@ proof.
       trivial.
     smt(size_ge0).
 
-    auto; progress.
+    auto; progress. 
     smt().
     smt().
     smt().
