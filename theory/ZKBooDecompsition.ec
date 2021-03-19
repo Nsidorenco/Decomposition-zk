@@ -152,7 +152,6 @@ pred valid_view (p : int) (view view2 : view) (c : circuit) =
 lemma valid_view_reflect: valid_view_op = valid_view.
 proof.
   rewrite /valid_view_op /valid_view.
-  progress.
   rewrite fun_ext2.
   progress.
   rewrite fun_ext2.
@@ -452,19 +451,11 @@ proof.
     rewrite /valid_circuit.
     progress.
     have := H i _. smt(size_rcons).
-    (* have -> := onth_nth (ADDC(0,0)) (rcons c g) i _. smt(size_rcons). *)
-    (* have -> := onth_nth (ADDC(0,0)) c i _. smt(size_rcons). *)
     rewrite nth_rcons.
-    case (i < size c); move => Hi.
-    smt().
-    smt().
+    case (i < size c); move=> /#. 
     have := H i _. smt(size_rcons).
-    (* have -> := onth_nth (ADDC(0,0)) (rcons c g) i _. smt(size_rcons). *)
-    (* have -> := onth_nth (ADDC(0,0)) c i _. smt(size_rcons). *)
     rewrite nth_rcons.
-    case (i < size c); move => Hi.
-    smt().
-    smt().
+    case (i < size c); move=> /#.
 qed.
 
 lemma valid_circuit_rcons_tail g c:
@@ -530,13 +521,7 @@ lemma eval_circuit_aux_size c:
       size (eval_circuit_aux c s) = size s + size c).
 proof.
     elim c; progress.
-    elim x; progress;
-    case x=> x1 x2.
-    simplify.
-    smt.
-    smt.
-    smt.
-    smt.
+    rewrite H size_rcons; algebra.
 qed.
 
 lemma eval_circuit_rcons c:
@@ -545,7 +530,7 @@ lemma eval_circuit_rcons c:
     =
     eval_circuit_aux (rcons c g) s)).
 proof.
-  elim c; smt.
+  elim c; progress; by rewrite H.
 qed.
 
 lemma compute_gate_correct g:
@@ -821,8 +806,6 @@ proof.
         proc. inline *. sp.
         splitwhile{1} 1 : 1 < size c.
         sim : (={w1, w2, w3, k1, k2, k3}).
-        (* sim : (={w1, w2, w3, k1, k2, k3}). *)
-        (* Invariant that behead c{1} = [l] *)
         wp.
         while (c{1} = rcons c0{2} l /\ w10{2} = w1{1} /\ w20{2} = w2{1} /\ w30{2} = w3{1} /\ k1{1} = k10{2} /\ k2{1} = k20{2} /\ k3{1} = k30{2}).
         auto; progress.
@@ -888,79 +871,31 @@ proof.
     have Hind' := Hind s cprev.
     call Hind'.
     clear Hind Hind' Hgate.
-    skip; progress.
-    (* smt(valid_circuit_rcons_head rcons_cat nth_cat size_rcons size_cat size_ge0 eval_circuit_rcons oget_some cats1 catA eval_circuit_rcons). *)
-    smt(valid_circuit_rcons_head rcons_cat).
-    have : result = (result.`1, result.`2, result.`3, result.`4, result.`5, result.`6) by smt().
-    smt().
-    have : result = (result.`1, result.`2, result.`3, result.`4, result.`5, result.`6) by smt().
-    smt().
-    have : result = (result.`1, result.`2, result.`3, result.`4, result.`5, result.`6) by smt().
-    smt().
-    rewrite /valid_circuit in H6.
-    have := H6 (size cprev + size c{m} - 1) _. smt(size_cat size_rcons size_ge0).
-    rewrite H.  simplify.
-    (* have -> := onth_nth (ADDC(0,0)) (cprev ++ rcons c{hr} g{hr}) (size cprev + size (rcons c{hr} g{hr}) - 1) _. *)
-      (* smt(size_cat size_rcons size_ge0). *)
-    (* rewrite oget_some. *)
-    rewrite nth_cat.
-    rewrite size_rcons.
-    smt(size_ge0 nth_rcons).
-    rewrite /valid_circuit in H6.
-    have := H6 (size cprev + size c{m} - 1) _. smt(size_cat size_rcons size_ge0).
-    rewrite H.  simplify.
-    (* have -> := onth_nth (ADDC(0,0)) (cprev ++ rcons c{hr} g{hr}) (size cprev + size (rcons c{hr} g{hr}) - 1) _. *)
-    (*   smt(size_cat size_rcons size_ge0). *)
-    (* rewrite oget_some. *)
-    rewrite nth_cat.
-    rewrite size_rcons.
-    smt(size_ge0 nth_rcons size_cat).
-
-    have : result = (result.`1, result.`2, result.`3, result.`4, result.`5, result.`6) by smt().
-    smt().
-    have : result = (result.`1, result.`2, result.`3, result.`4, result.`5, result.`6) by smt().
-    smt().
-    have : result = (result.`1, result.`2, result.`3, result.`4, result.`5, result.`6) by smt().
-    smt().
-    have : result = (result.`1, result.`2, result.`3, result.`4, result.`5, result.`6) by smt().
-    smt().
-    have : result = (result.`1, result.`2, result.`3, result.`4, result.`5, result.`6) by smt().
-    smt().
-    have : result = (result.`1, result.`2, result.`3, result.`4, result.`5, result.`6) by smt().
-    smt().
-    have : result = (result.`1, result.`2, result.`3, result.`4, result.`5, result.`6) by smt().
-    smt().
-    have : result = (result.`1, result.`2, result.`3, result.`4, result.`5, result.`6) by smt().
-    smt().
-    have : result = (result.`1, result.`2, result.`3, result.`4, result.`5, result.`6) by smt().
-    have : result0 = (result0.`1, result0.`2, result0.`3, result0.`4, result0.`5, result0.`6) by smt().
-    smt(eval_circuit_rcons).
-    have : result0 = (result0.`1, result0.`2, result0.`3, result0.`4, result0.`5, result0.`6) by smt().
-    rewrite - cats1.
-    have <- : cprev ++ c{hr} ++ [g{hr}] = cprev ++ (c{hr} ++ [g{hr}]) by rewrite catA. 
-    smt().
-    have : result0 = (result0.`1, result0.`2, result0.`3, result0.`4, result0.`5, result0.`6) by smt().
-    rewrite - cats1.
-    have <- : cprev ++ c{hr} ++ [g{hr}] = cprev ++ (c{hr} ++ [g{hr}]) by rewrite catA.
-    smt().
-    have : result0 = (result0.`1, result0.`2, result0.`3, result0.`4, result0.`5, result0.`6) by smt().
-    rewrite - cats1.
-    have <- : cprev ++ c{hr} ++ [g{hr}] = cprev ++ (c{hr} ++ [g{hr}]) by rewrite catA.
-    smt().
-    have : result0 = (result0.`1, result0.`2, result0.`3, result0.`4, result0.`5, result0.`6) by smt().
-    smt(size_rcons size_cat).
-    have : result0 = (result0.`1, result0.`2, result0.`3, result0.`4, result0.`5, result0.`6) by smt().
-    smt().
-    have : result0 = (result0.`1, result0.`2, result0.`3, result0.`4, result0.`5, result0.`6) by smt().
-    smt().
-    have : result0 = (result0.`1, result0.`2, result0.`3, result0.`4, result0.`5, result0.`6) by smt().
-    smt().
-    have : result0 = (result0.`1, result0.`2, result0.`3, result0.`4, result0.`5, result0.`6) by smt().
-    smt(eval_circuit_rcons).
-    have : result0 = (result0.`1, result0.`2, result0.`3, result0.`4, result0.`5, result0.`6) by smt().
-    smt().
-    have : result0 = (result0.`1, result0.`2, result0.`3, result0.`4, result0.`5, result0.`6) by smt().
-    smt().
+    auto=> &1 S1.
+    - split; do ? split; 1..12: smt(valid_circuit_rcons_head rcons_cat).
+    - move=> S2 L.
+      elim L.
+      move=> ?????? S3.
+      split.
+      move: S1 S2 S3; progress; 1..6: smt(valid_circuit_rcons_tail rcons_cat).
+    - move=> S4 L.
+      elim L.
+      move=> ?????? S5.
+      move: S1 S2 S3 S4 S5; progress.
+      + rewrite -eval_circuit_rcons; smt().
+      + move: (H43 i _). split; assumption.
+        move=> [-> _].
+        by rewrite -!cats1 catA. 
+      + move: (H43 i _). split; assumption.
+        move=> [_ [-> _]].
+        by rewrite -!cats1 catA. 
+      + move: (H43 i _). split; assumption.
+        move=> [_ [_ ->]].
+        by rewrite -!cats1 catA. 
+      + smt(size_cat size_rcons).
+      + by rewrite -H49 eval_circuit_rcons eval_circuit_aux_size. 
+      + smt().
+      + smt().
 qed.
 
 lemma verifiability c' x' e' &m:
@@ -975,8 +910,7 @@ proof.
   auto; progress.
   have Hcir := compute_circuit_correct c' [x'] [].
   call Hcir. clear Hcir.
-  auto.
-  progress.
+  auto; progress.
   apply dinput_ll.
   smt().
   smt().
@@ -1328,33 +1262,8 @@ equiv verify_properties c' vs' e' ys':
 proof.
   proc.
   auto.
-  progress; try assumption.
-  - have -> : e{2} = 2.
-    + rewrite supp_dinter in H.
-      smt().
-    smt().
-  - have -> : e{2} = 2.
-    + rewrite supp_dinter in H.
-      smt().
-    smt().
-  - have -> : e{2} = 2.
-    + rewrite supp_dinter in H.
-      smt().
-    smt().
-  - move: H3.
-    have -> : e{2} = 2.
-    + rewrite supp_dinter in H.
-      smt().
-    trivial.
-  - move: H4.
-    have -> : e{2} = 2.
-    + rewrite supp_dinter in H.
-      smt().
-    trivial.
-  - have <- : e{2} = 2.
-    + rewrite supp_dinter in H.
-      smt().
-    apply H2.
+  rewrite supp_dinter.
+  progress; try assumption; smt().
 qed.
 
 lemma verify_properties_phoare c' vs' e' ys':
@@ -1736,7 +1645,6 @@ lemma soundness c' vs'' es' ys' &m:
     (forall i, 0 <= i < size es' => nth 0 es' i \in challenge) /\
     valid_circuit c' /\
     fully_consistent vs'' es' /\ size ys' = n =>
-    (* (forall i, 0 <= i < n => in_doms_f n es i) (* Must reveal all views *) => *)
       Pr[Soundness(Phi).main(c', vs'', es', ys') @ &m : res] = 1%r.
 proof.
    (* Change precondition *)
@@ -1865,29 +1773,15 @@ proof.
   call Hver1.
   call Hver0. clear Hver2 Hver1 Hver0 Hver H6 H.
   auto. 
-  progress.
-  by rewrite supp_dinter.
-  by rewrite supp_dinter.
-  by rewrite supp_dinter.
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  move: H18.
-  rewrite /nth_looping H37=>/>.
+  progress;
+  [ 1..3: by rewrite supp_dinter
+  | 3..9, 11..15: smt()].
 
   rewrite (list_size_elems H12).
   move: H19 H28 H20.
   rewrite /nth_looping=>/>.
   rewrite /output=>/>.
   by rewrite H40 H37 H38=> -> -> ->.
-
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
 
   rewrite -valid_view_reflect.
   rewrite -H37 -H38.
@@ -1966,78 +1860,41 @@ proof.
     elim g; progress; last first.
     (* Discharge trivial case: ADDC MULTC ADD *)
     rnd; skip. elim x. rewrite !size_rcons=>/>. 
-    progress.
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    
-    rewrite !nth_rcons.
-    smt().
+    progress; 1..7: smt(size_rcons).
+    - rewrite !nth_rcons.
+      smt().
 
     rnd; skip. elim x. rewrite !size_rcons=>/>. 
-    progress.
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    
-    rewrite !nth_rcons.
-    smt().
+    progress; 1..7: smt(size_rcons).
+    - rewrite !nth_rcons.
+      smt().
 
     rnd; skip. elim x. rewrite !size_rcons=>/>. 
-    progress.
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    
-    rewrite !nth_rcons.
-    case (i < size s)=>Hsize. smt().
-    have : i = size s. smt(size_rcons).
-    rewrite -H -H0 -H1=>/>.
-    rewrite -!mulzDl.
-    congr.
-    smt().
+    progress; 1..7: smt(size_rcons).
+    - rewrite !nth_rcons.
+      case (i < size s)=>Hsize. smt().
+      have : i = size s. smt(size_rcons).
+      rewrite -H -H0 -H1=>/>.
+      rewrite -!mulzDl.
+      congr.
+      smt().
 
     - (* MULT *)
       elim x=> x1 x2.
       rnd (fun z => (nth 0 w2{2} x1 * nth 0 w2{2} x2 + nth 0 w3{1} x1 * nth 0 w2{2} x2 + nth 0 w2{2} x1 * nth 0 w3{1} x2 + r2{2} - z)).
       skip. rewrite !size_rcons=>/>. 
-      progress.
-      smt(size_rcons).
-      apply dinput_funi.
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-
-      rewrite !nth_rcons.
-      case (i < size s)=>Hsize. smt().
-      have : i = size s. smt(size_rcons).
-      rewrite -H -H0 -H1=>/>.
-      rewrite H9 H8 H7 H6 H=>/>.
-      have <- := H13 x1 _. smt().
-      have <- := H13 x2 _. smt().
-      smt().
-
-      rewrite !nth_rcons.
-      rewrite -H11 H8 H7 H6=>/>.
-
+      progress; 1..11~2: smt(size_rcons).
+      - apply dinput_funi.
+      - rewrite !nth_rcons.
+        case (i < size s)=>Hsize. smt().
+        have : i = size s. smt(size_rcons).
+        rewrite -H -H0 -H1=>/>.
+        rewrite H9 H8 H7 H6 H=>/>.
+        have <- := H13 x1 _. smt().
+        have <- := H13 x2 _. smt().
+        smt().
+      - rewrite !nth_rcons.
+        rewrite -H11 H8 H7 H6=>/>.
 
     case (e' = 1); progress.
     (* rnd. rnd. rnd. auto. *)
@@ -2050,95 +1907,50 @@ proof.
     elim g; progress; last first.
     (* Discharge trivial case: ADDC MULTC ADD *)
     rnd; skip. elim x. rewrite !size_rcons=>/>. 
-    progress.
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    
-    rewrite !nth_rcons.
-    case (i < size s)=>Hsize. smt().
-    have : i = size s by smt(size_rcons).
-    rewrite -H -H0 -H1=>/>.
-    have <- := H13 x1 _. smt().
-    have <- := H13 x2 _. smt().
-    smt().
+    progress; 1..9: smt(size_rcons).
+    - rewrite !nth_rcons.
+      case (i < size s)=>Hsize. smt().
+      have : i = size s by smt(size_rcons).
+      rewrite -H -H0 -H1=>/>.
+      have <- := H13 x1 _. smt().
+      have <- := H13 x2 _. smt().
+      smt().
 
     rnd; skip. elim x. rewrite !size_rcons=>/>. 
-    progress.
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    
-    rewrite !nth_rcons.
-    smt().
+    progress; 1..9: smt(size_rcons).
+    - rewrite !nth_rcons.
+      smt().
 
     rnd; skip. elim x. rewrite !size_rcons=>/>. 
-    progress.
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    
-    rewrite !nth_rcons.
-    case (i < size s)=>Hsize. smt().
-    have : i = size s. smt(size_rcons).
-    rewrite -H -H0 -H1=>/>.
-    rewrite -!mulzDl.
-    congr.
-    smt().
+    progress; 1..9: smt(size_rcons).
+    - rewrite !nth_rcons.
+      case (i < size s)=>Hsize. smt().
+      have : i = size s. smt(size_rcons).
+      rewrite -H -H0 -H1=>/>.
+      rewrite -!mulzDl.
+      congr.
+      smt().
 
     - (* MULT *)
       elim x=> x1 x2.
       rnd (fun z => (nth 0 w3{1} x1 * nth 0 w3{1} x2 + nth 0 w1{1} x1 * nth 0 w3{1} x2 + nth 0 w3{1} x1 * nth 0 w1{1} x2 + r2{2} - z)).
       skip. rewrite !size_rcons=>/>. 
-      progress.
-      smt(size_rcons).
-      apply dinput_funi.
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-
-      rewrite !nth_rcons.
-      case (i < size s)=>Hsize. smt().
-      have : i = size s. smt(size_rcons).
-      rewrite -H -H0 -H1=>/>.
-      rewrite H9 H8 H7 H6 H=>/>.
-      have <- := H13 x1 _. smt().
-      have <- := H13 x2 _. smt().
-      smt().
-
-      congr.
-      rewrite !nth_rcons.
-      rewrite H8 H7 -H0 H H6=>/>.
-
-      congr.
-      rewrite !nth_rcons.
-      rewrite -H11 H8 -H0 H H6=>/>.
+      progress; 1..13~2: smt(size_rcons).
+      - apply dinput_funi.
+      - rewrite !nth_rcons.
+        case (i < size s)=>Hsize. smt().
+        have : i = size s. smt(size_rcons).
+        rewrite -H -H0 -H1=>/>.
+        rewrite H9 H8 H7 H6 H=>/>.
+        have <- := H13 x1 _. smt().
+        have <- := H13 x2 _. smt().
+        smt().
+      - congr.
+        rewrite !nth_rcons.
+        rewrite H8 H7 -H0 H H6=>/>.
+      - congr.
+        rewrite !nth_rcons.
+        rewrite -H11 H8 -H0 H H6=>/>.
       
     case (e' = 2).
     rcondf{2} 1. auto.
@@ -2150,95 +1962,50 @@ proof.
     elim g; progress; last first.
     (* Discharge trivial case: ADDC MULTC ADD *)
     rnd; skip. elim x. rewrite !size_rcons=>/>. 
-    progress.
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    
-    rewrite !nth_rcons.
-    case (i < size s)=>Hsize. smt().
-    have : i = size s by smt(size_rcons).
-    rewrite -H -H0 -H1=>/>.
-    have <- := H13 x1 _. smt().
-    have <- := H13 x2 _. smt().
-    smt().
+    progress; 1..9: smt(size_rcons).
+    - rewrite !nth_rcons.
+      case (i < size s)=>Hsize. smt().
+      have : i = size s by smt(size_rcons).
+      rewrite -H -H0 -H1=>/>.
+      have <- := H13 x1 _. smt().
+      have <- := H13 x2 _. smt().
+      smt().
 
     rnd; skip. elim x. rewrite !size_rcons=>/>. 
-    progress.
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    
-    rewrite !nth_rcons.
-    smt().
+    progress; 1..9: smt(size_rcons).
+    - rewrite !nth_rcons.
+      smt().
 
     rnd; skip. elim x. rewrite !size_rcons=>/>. 
-    progress.
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    smt(size_rcons).
-    
-    rewrite !nth_rcons.
-    case (i < size s)=>Hsize. smt().
-    have : i = size s. smt(size_rcons).
-    rewrite -H -H0 -H1=>/>.
-    rewrite -!mulzDl.
-    congr.
-    smt().
+    progress; 1..9: smt(size_rcons).
+    - rewrite !nth_rcons.
+      case (i < size s)=>Hsize. smt().
+      have : i = size s. smt(size_rcons).
+      rewrite -H -H0 -H1=>/>.
+      rewrite -!mulzDl.
+      congr.
+      smt().
 
     - (* MULT *)
       elim x=> x1 x2.
       rnd (fun z => (nth 0 w1{1} x1 * nth 0 w1{1} x2 + nth 0 w2{1} x1 * nth 0 w1{1} x2 + nth 0 w1{1} x1 * nth 0 w2{1} x2 + r2{2} - z)).
       skip. rewrite !size_rcons=>/>. 
-      progress.
-      smt(size_rcons).
+      progress; 1..13~2: smt(size_rcons).
       apply dinput_funi.
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-      smt(size_rcons).
-
-      rewrite !nth_rcons.
-      case (i < size s)=>Hsize. smt().
-      have : i = size s. smt(size_rcons).
-      rewrite -H -H0 -H1=>/>.
-      rewrite H9 H8 H7 H6 H=>/>.
-      have <- := H13 x1 _. smt().
-      have <- := H13 x2 _. smt().
-      smt().
-
-      congr.
-      rewrite !nth_rcons.
-      rewrite H8 -H -H1 H6=>/>.
-
-      congr.
-      rewrite !nth_rcons.
-      rewrite -H11 H8 -H1 H7 H6 -H=>/>.
+      - rewrite !nth_rcons.
+        case (i < size s)=>Hsize. smt().
+        have : i = size s. smt(size_rcons).
+        rewrite -H -H0 -H1=>/>.
+        rewrite H9 H8 H7 H6 H=>/>.
+        have <- := H13 x1 _. smt().
+        have <- := H13 x2 _. smt().
+        smt().
+      - congr.
+        rewrite !nth_rcons.
+        rewrite H8 -H -H1 H6=>/>.
+      - congr.
+        rewrite !nth_rcons.
+        rewrite -H11 H8 -H1 H7 H6 -H=>/>.
 
   exfalso. progress.
   have : ! (e' \in challenge /\ e' <> 0 /\ e' <> 1 /\ e' <> 2).
@@ -2249,7 +2016,6 @@ qed.
 
 lemma phi_sim_circuit_equiv c' e':
     (forall (cprev : gate list) s,
-      (* s' = eval_circuit_aux c' s => *)
       equiv[Phi.compute ~ Phi.simulate :
             size s - 1= size cprev /\ 0 < size s /\
             size s = size w1{1} /\
@@ -2508,35 +2274,12 @@ proof.
       trivial.
     smt(size_ge0).
 
-    auto; progress. 
-    smt().
-    smt().
-    smt().
-    smt().
-    smt().
-    smt().
-    smt().
-    smt().
-    smt().
-    smt().
-    smt().
-    have -> : c{1} = rcons x l by smt().
-    rewrite size_rcons.
-    have <- : c0{2} = x by smt().
-    rewrite -size_eq0 in H0.
-    smt(size_ge0).
-    smt().
-    smt().
-    smt().
-    smt().
-    smt().
-    smt().
-    smt().
-    smt().
-    smt().
-    smt().
-    smt().
-    smt().
+    auto; progress; 1..11,13..: smt().
+    - have -> : c{1} = rcons x l by smt().
+      rewrite size_rcons.
+      have <- : c0{2} = x by smt().
+      rewrite -size_eq0 in H0.
+      smt(size_ge0).
   (* main proof *)
   symmetry.
   proc. auto.
@@ -2544,154 +2287,34 @@ proof.
   have IH' := IH cprev s.
   call Hgate. call IH'.
   clear IH IH' Hgate.
-  auto; progress; try move: H31; try (move: H29; elim result_L; elim result_R); progress.
-  have -> := valid_circuit_rcons_head g{1} (cprev ++ c{1}).
-  move : H0.
-  by rewrite rcons_cat=>/>.
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  rewrite /valid_circuit in H0.
-  have := H0 (size cprev + size c{1}) _. smt(size_ge0 size_cat size_rcons).
-  have := nth_last (ADDC(0,0)) (cprev ++ rcons c{1} g{1}).
-  rewrite size_cat size_rcons addzA.
-  have -> : (size cprev + size c{1} + 1 - 1) = (size cprev + size c{1}) by smt().
-  move=> Hlast />.
-  by rewrite Hlast last_cat last_rcons.
-  rewrite /valid_circuit in H0.
-  have := H0 (size cprev + size c{1}) _. smt(size_ge0 size_cat size_rcons).
-  have := nth_last (ADDC(0,0)) (cprev ++ rcons c{1} g{1}).
-  rewrite size_cat size_rcons addzA.
-  have -> : (size cprev + size c{1} + 1 - 1) = (size cprev + size c{1}) by smt().
-  move=> Hlast />.
-  by rewrite Hlast last_cat last_rcons size_cat.
-  smt(size_cat).
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  smt().
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  progress.
-  smt().
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  progress.
-  smt().
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  progress.
-  by rewrite -H54 eval_circuit_rcons.
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  trivial.
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  progress.
-  smt().
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  progress.
-  smt().
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  progress.
-  smt().
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  progress.
-  smt().
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  progress.
-  smt().
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  progress.
-  by rewrite -H54 eval_circuit_rcons eval_circuit_aux_size size_rcons.
-  move: H48 H50.
-  elim result_L0.
-  elim result_R0.
-  progress.
-  rewrite -eval_circuit_rcons.
-  smt(nth_rcons).
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  trivial.
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  trivial.
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  trivial.
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  trivial.
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  trivial.
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  trivial.
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  trivial.
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  trivial.
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  smt().
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  smt().
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  smt().
-  move: H48.
-  elim result_L0.
-  elim result_R0.
-  progress.
+  auto=> &1 &2 H; simplify.
+  split; do ? split; 1..6,8..19: smt().
+  - have -> := valid_circuit_rcons_head l (cprev ++ x). rewrite rcons_cat. smt().
+    trivial.
+  move=> H1 L R.
+  elim L; elim R.
+  move=> ??????????? H2.
+  split.
+  move: H H1 H2; progress;
+  1..3, 7..23: smt().
+  - move: H0.
+    have -> : cprev ++ rcons c{1} g{1} = rcons (cprev ++ c{1}) g{1} by rewrite rcons_cat.
+    move=> H0. have := valid_circuit_rcons_tail g{1} (cprev ++ c{1}) H0.
+    by rewrite /valid_gate. 
+  - move: H0.
+    have -> : cprev ++ rcons c{1} g{1} = rcons (cprev ++ c{1}) g{1} by rewrite rcons_cat.
+    move=> H0. have := valid_circuit_rcons_tail g{1} (cprev ++ c{1}) H0.
+    by rewrite /valid_gate. 
+  - rewrite H31 eval_circuit_aux_size size_cat.
+    smt().
+
+  move=> H3.
+  move=> L R.
+  elim L; elim R.
+  progress;
+  1..2, 4..9: smt(size_rcons).
+  rewrite -H9 size_rcons !eval_circuit_aux_size size_rcons. algebra.
+  rewrite eval_circuit_rcons in H12.
   smt().
 qed.
 
@@ -2722,13 +2345,7 @@ proof.
     swap{1} 2 - 1.
     rnd (fun z => x{1} - x20{1} - z).
     rnd.
-    skip. progress.
-    + algebra.
-    + apply dinput_funi.
-    + apply dinput_fu.
-    + algebra.
-    + algebra.
-    + algebra.
+    skip. progress; [2: apply dinput_funi | 3: apply dinput_fu else algebra].
     call phi_equiv; clear phi_equiv. 
     auto; progress; try (move: H5; elim result_L; elim result_R); progress.
     + smt().
@@ -2743,12 +2360,7 @@ proof.
     sp; wp.
     swap{2} 2 - 1.
     rnd (fun z => x{1} - x10{1} - z).
-    rnd; skip; progress.
-    - algebra.
-    - apply dinput_funi.
-    - apply dinput_fu.
-    - algebra.
-    - algebra.
+    rnd; skip; progress; [2: apply dinput_funi | 3 : apply dinput_fu else algebra].
     call phi_equiv; clear phi_equiv.
     auto; progress; try (move: H6; elim result_L; elim result_R); progress.
     + smt().
