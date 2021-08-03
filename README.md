@@ -2,6 +2,10 @@ This repositiory contains the EasyCrypt formalisation of the paper:
 - **[Formal security analysis of MPC-in-the-head zero-knowledge protocols](https://eprint.iacr.org/2021/437).**
   Nikolaj Sidorenco, Sabine Oechsner, and Bas Spitters.
   CSF 2021.
+ 
+## Additional Material
+- **[ZKProof Workshop 4](https://youtu.be/E9oBq09n3Q8)**
+- **[CSF'21](https://youtu.be/ADBBbOLMcIM)**
 
 # Installation requirements
 - Why3 1.3.3
